@@ -1,0 +1,9 @@
+{
+  "admin": {
+    "username": "admin",
+    "password": "admin",
+    "is_admin": true,
+    "credits": 9999,
+    "groups": []
+  }
+}

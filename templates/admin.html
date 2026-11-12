@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070a0e">
+<title>BISHAL Engine — Admin Control Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#070a0e;
+  --side:#0a0f14;
+  --surface:#0f161c;
+  --surface2:#141d24;
+  --surface3:#1a252e;
+  --line:rgba(255,255,255,.07);
+  --line-strong:rgba(255,255,255,.12);
+  --text:#f0f4f8;
+  --muted:#94a3b8;
+  --muted-2:#64748b;
+  --green:#34d399;
+  --green-2:#10b981;
+  --cyan:#22d3ee;
+  --red:#fb7185;
+  --amber:#fbbf24;
+  --mono:"JetBrains Mono",monospace;
+  --sans:"Inter",-apple-system,sans-serif;
+  --shadow:0 24px 60px rgba(0,0,0,.5);
+  --shadow-sm:0 8px 24px rgba(0,0,0,.35);
+  --sidebar:264px;
+  --radius:16px;
+  --radius-sm:11px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;
+  color:var(--text);
+  font-family:var(--sans);
+  background:
+    radial-gradient(ellipse at 82% 0%,rgba(34,211,238,.05),transparent 32%),
+    radial-gradient(ellipse at 25% 0%,rgba(52,211,153,.075),transparent 36%),
+    var(--bg);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.mono{font-family:var(--mono)}
+.muted{color:var(--muted)}
+.green{color:var(--green)}
+.hidden{display:none!important}
+
+/* ══════════ SIDEBAR ══════════ */
+.sidebar{
+  position:fixed;inset:0 auto 0 0;width:var(--sidebar);
+  background:linear-gradient(180deg,#0b1116,#080d11);
+  border-right:1px solid var(--line);z-index:30;
+  display:flex;flex-direction:column;
+  padding:22px 15px 16px;
+  transition:transform .3s var(--ease);
+}
+.brand{
+  display:flex;align-items:center;gap:12px;
+  padding:3px 10px 26px;border-bottom:1px solid var(--line);
+}
+.brand-mark{
+  width:42px;height:42px;border-radius:12px;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#6ee7b7,#10b981);
+  color:#03110a;font-weight:900;font-size:14px;
+  letter-spacing:-.04em;
+  box-shadow:0 0 28px rgba(16,185,129,.22),inset 0 1px 0 rgba(255,255,255,.3);
+  transition:transform .25s var(--ease);
+}
+.brand-mark:hover{transform:rotate(-4deg) scale(1.04)}
+.brand-title{
+  font-size:15px;font-weight:800;letter-spacing:.04em;
+  background:linear-gradient(90deg,#f0f4f8,#a7f3d0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.brand-sub{
+  font-size:10px;color:var(--muted-2);letter-spacing:.16em;
+  text-transform:uppercase;margin-top:3px;font-weight:600;
+}
+.nav-label{
+  font-size:10px;color:#4b5a69;
+  text-transform:uppercase;letter-spacing:.16em;
+  font-weight:700;padding:24px 11px 10px;
+}
+.nav{display:grid;gap:4px}
+.nav button{
+  width:100%;display:flex;align-items:center;gap:12px;
+  border:1px solid transparent;background:transparent;
+  color:#8b98a8;padding:11px 13px;border-radius:10px;
+  text-align:left;font-weight:500;font-size:13px;
+  transition:all .2s var(--ease);
+}
+.nav button i{width:17px;text-align:center;font-size:14px}
+.nav button:hover{background:rgba(255,255,255,.035);color:var(--text)}
+.nav button.active{
+  color:var(--green);font-weight:600;
+  background:linear-gradient(90deg,rgba(52,211,153,.13),rgba(52,211,153,.03));
+  border-color:rgba(52,211,153,.14);
+  box-shadow:inset 3px 0 var(--green),0 0 24px rgba(52,211,153,.04);
+}
+.sidebar-bottom{
+  margin-top:auto;border-top:1px solid var(--line);
+  padding:16px 7px 0;
+}
+.admin-mini{display:flex;align-items:center;gap:10px}
+.avatar{
+  width:36px;height:36px;border-radius:11px;
+  background:linear-gradient(135deg,#064e3b,#10b981);
+  color:#d1fae5;display:grid;place-items:center;font-weight:800;font-size:13px;
+  box-shadow:0 0 0 2px rgba(16,185,129,.18);
+}
+.admin-mini strong{display:block;font-size:12px;font-weight:700}
+.admin-mini small{color:var(--muted-2);font-size:10px}
+
+/* ══════════ MAIN ══════════ */
+.main{margin-left:var(--sidebar);min-height:100vh}
+
+.topbar{
+  height:76px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;background:rgba(7,10,14,.6);
+  backdrop-filter:blur(16px);position:sticky;top:0;z-index:15;
+}
+.top-left{display:flex;align-items:center;gap:13px}
+.page-kicker{
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--green);font-weight:700;
+}
+.page-title{font-size:18px;font-weight:700;margin-top:2px;letter-spacing:-.02em}
+.top-right{display:flex;align-items:center;gap:12px}
+.connection{
+  display:flex;align-items:center;gap:8px;
+  color:var(--muted);font-size:11px;font-weight:500;
+  padding:6px 10px;border-radius:8px;
+  background:rgba(255,255,255,.02);border:1px solid var(--line);
+}
+.pulse{
+  width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 12px var(--green);animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.icon-button{
+  width:36px;height:36px;border:1px solid var(--line);
+  border-radius:10px;background:var(--surface);color:var(--muted);
+  display:grid;place-items:center;transition:all .2s var(--ease);
+}
+.icon-button:hover{color:var(--green);border-color:rgba(52,211,153,.3);background:var(--surface2)}
+.menu-toggle{display:none}
+
+.content{max-width:1520px;padding:30px 32px 52px;margin:auto}
+.page-section{display:none;animation:fadeUp .3s var(--ease)}
+.page-section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.page-heading{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  gap:18px;margin-bottom:24px;flex-wrap:wrap;
+}
+.page-heading h1{
+  font-size:27px;letter-spacing:-.035em;margin:0 0 5px;
+  font-weight:800;
+}
+.page-heading p{font-size:13px;color:var(--muted);margin:0;line-height:1.5}
+.eyebrow{
+  color:var(--green);font-size:10px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px;
+}
+
+/* ══════════ BUTTONS ══════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 15px;border:1px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--surface2);color:var(--text);
+  font-weight:600;font-size:12.5px;transition:all .22s var(--ease);
+  white-space:nowrap;
+}
+.btn:hover:not(:disabled){
+  transform:translateY(-1px);
+  border-color:rgba(52,211,153,.32);
+  background:var(--surface3);
+  box-shadow:0 6px 20px rgba(0,0,0,.3);
+}
+.btn-primary{
+  background:linear-gradient(135deg,#6ee7b7,#34d399);
+  border:0;color:#03110a;font-weight:700;
+  box-shadow:0 7px 22px rgba(16,185,129,.18);
+}
+.btn-primary:hover:not(:disabled){
+  background:linear-gradient(135deg,#a7f3d0,#34d399);
+  box-shadow:0 9px 28px rgba(16,185,129,.28);
+}
+.btn-danger{
+  color:#fecdd3;background:rgba(251,113,133,.08);
+  border-color:rgba(251,113,133,.18);
+}
+.btn-danger:hover:not(:disabled){border-color:rgba(251,113,133,.35);background:rgba(251,113,133,.12)}
+.btn-warning{
+  color:#fde68a;background:rgba(251,191,36,.08);
+  border-color:rgba(251,191,36,.18);
+}
+.btn-warning:hover:not(:disabled){border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.12)}
+.btn-sm{padding:7px 11px;font-size:11px;border-radius:8px}
+
+/* ══════════ CARDS ══════════ */
+.card{
+  background:linear-gradient(145deg,rgba(18,26,32,.97),rgba(13,19,24,.97));
+  border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.panel{padding:22px}
+.panel-head{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin-bottom:18px;flex-wrap:wrap;
+}
+.panel-head h2{
+  font-size:15px;margin:0;font-weight:700;
+  display:flex;align-items:center;gap:9px;
+}
+.panel-head h2 i{font-size:14px}
+.panel-head p{font-size:11.5px;color:var(--muted);margin:5px 0 0;line-height:1.5}
+
+/* ══════════ STATS ══════════ */
+.stat-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;margin-bottom:20px;
+}
+.stat-card{
+  padding:22px;position:relative;overflow:hidden;min-height:146px;
+  transition:border-color .3s var(--ease),transform .3s var(--ease);
+}
+.stat-card:hover{border-color:rgba(52,211,153,.15);transform:translateY(-2px)}
+.stat-card:after{
+  content:"";position:absolute;width:130px;height:130px;
+  right:-50px;top:-58px;border-radius:50%;
+  background:rgba(52,211,153,.055);filter:blur(4px);pointer-events:none;
+}
+.stat-top{
+  display:flex;align-items:center;justify-content:space-between;
+  color:var(--muted);font-size:12.5px;font-weight:500;
+}
+.stat-icon{
+  width:36px;height:36px;display:grid;place-items:center;
+  border-radius:11px;color:var(--green);
+  background:rgba(52,211,153,.08);font-size:14px;
+  transition:background .3s;
+}
+.stat-card:hover .stat-icon{background:rgba(52,211,153,.14)}
+.stat-number{
+  font:700 clamp(26px,3vw,36px) var(--mono);
+  letter-spacing:-.06em;margin-top:16px;
+}
+.stat-foot{font-size:10.5px;color:var(--muted-2);margin-top:8px;line-height:1.5}
+
+/* ══════════ GRID LAYOUTS ══════════ */
+.grid-two{
+  display:grid;
+  grid-template-columns:minmax(280px,.75fr) minmax(0,1.55fr);
+  gap:17px;align-items:start;
+}
+.form-card{padding:22px}
+.field{margin-bottom:15px}
+.field label{
+  display:block;color:#c4d0dc;font-size:11.5px;
+  font-weight:600;margin-bottom:7px;letter-spacing:.01em;
+}
+.field small{
+  display:block;color:var(--muted-2);font-size:10.5px;
+  margin-top:7px;line-height:1.5;
+}
+
+input,select,textarea{
+  width:100%;min-width:0;background:#080d11;color:var(--text);
+  border:1px solid var(--line);border-radius:10px;
+  padding:11px 13px;outline:none;
+  transition:border-color .2s,box-shadow .2s;font-size:13px;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(52,211,153,.55);
+  box-shadow:0 0 0 3px rgba(52,211,153,.07);
+}
+input::placeholder,textarea::placeholder{color:#53616c}
+textarea{
+  min-height:210px;resize:vertical;
+  font:11.5px/1.65 var(--mono);
+}
+
+/* ══════════ TABLE ══════════ */
+.table-card{overflow:hidden}
+.table-scroll{overflow:auto}
+table{
+  width:100%;border-collapse:collapse;min-width:600px;text-align:left;
+}
+th,td{
+  padding:13px 16px;border-bottom:1px solid var(--line);
+  font-size:11.5px;white-space:nowrap;
+}
+th{
+  background:#0b1218;color:#7a8896;
+  text-transform:uppercase;letter-spacing:.11em;
+  font-size:9.5px;font-weight:700;
+}
+td{color:#d5e0e9}
+tr:last-child td{border-bottom:0}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:rgba(255,255,255,.018)}
+.table-empty{text-align:center;color:var(--muted);padding:32px!important}
+
+.action-row{display:flex;gap:6px;align-items:center}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  border-radius:99px;padding:5px 9px;
+  font-size:9px;font-weight:800;letter-spacing:.07em;
+}
+.pill-green{color:var(--green);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.16)}
+.pill-red{color:#fda4af;background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.14)}
+.pill-yellow{color:#fde68a;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.15)}
+
+/* ══════════ FEED LIST ══════════ */
+.feed-list{display:grid;gap:10px}
+.feed-item{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:13px;
+  border:1px solid var(--line);
+  background:rgba(7,12,16,.55);
+  border-radius:12px;
+  transition:border-color .2s,background .2s;
+}
+.feed-item:hover{border-color:rgba(52,211,153,.14);background:rgba(9,15,20,.7)}
+.feed-name{font-size:12.5px;font-weight:700}
+.feed-sub{font:10.5px var(--mono);color:var(--muted);margin-top:4px}
+.feed-glory{font:600 14px var(--mono);color:var(--green)}
+
+/* ══════════ COUPONS ══════════ */
+.coupon-code{font:600 11.5px var(--mono);color:#d1fae5}
+.code-copy{
+  border:0;background:transparent;color:var(--muted);
+  padding:5px 7px;transition:color .2s;
+}
+.code-copy:hover{color:var(--green)}
+
+/* ══════════ GROUPS ══════════ */
+.group-list{display:grid;gap:13px}
+.group-card{
+  padding:18px;border:1px solid var(--line);
+  border-radius:15px;background:rgba(8,13,17,.62);
+  transition:all .3s var(--ease);
+}
+.group-card:hover{border-color:rgba(52,211,153,.18);transform:translateY(-1px);background:rgba(10,16,21,.8)}
+.group-top{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}
+.group-title{font-size:14.5px;font-weight:700;overflow-wrap:anywhere}
+.group-sub{font:10.5px var(--mono);color:var(--muted);margin-top:5px;overflow-wrap:anywhere}
+.group-glory{
+  font:700 24px var(--mono);color:var(--green);
+  margin:15px 0;letter-spacing:-.05em;
+}
+.group-glory small{font:500 9px var(--sans);color:var(--muted-2);letter-spacing:.08em}
+.group-meta{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;padding:13px 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.meta-label{
+  font-size:9px;color:var(--muted-2);
+  text-transform:uppercase;letter-spacing:.11em;
+  margin-bottom:5px;font-weight:600;
+}
+.meta-value{
+  font:600 10.5px var(--mono);color:#d5e0e9;
+  overflow-wrap:anywhere;
+}
+.progress-line{
+  height:5px;background:#1b2530;border-radius:99px;
+  overflow:hidden;margin-top:11px;
+}
+.progress-line span{
+  display:block;height:100%;
+  background:linear-gradient(90deg,#10b981,#67e8f9);
+  border-radius:99px;transition:width .6s var(--ease);
+}
+.group-actions{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap}
+
+/* ══════════ API ══════════ */
+.endpoint-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+.endpoint{
+  padding:17px;border:1px solid var(--line);
+  border-radius:13px;background:rgba(8,13,17,.55);
+  min-width:0;transition:border-color .2s,background .2s;
+}
+.endpoint:hover{border-color:rgba(52,211,153,.14);background:rgba(9,15,20,.7)}
+.endpoint-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.method{font:700 9px var(--mono);padding:5px 8px;border-radius:6px;letter-spacing:.05em}
+.method-get{color:#67e8f9;background:rgba(34,211,238,.09)}
+.method-post{color:var(--green);background:rgba(52,211,153,.09)}
+.endpoint-url{
+  font:600 11.5px var(--mono);
+  overflow-wrap:anywhere;color:#e2e8f0;
+}
+.endpoint-desc{font-size:11.5px;color:var(--muted);line-height:1.55;margin:10px 0}
+.endpoint-params{
+  font:10.5px/1.5 var(--mono);color:var(--muted-2);
+  overflow-wrap:anywhere;
+}
+
+/* ══════════ NOTICE ══════════ */
+.notice{
+  padding:13px 15px;
+  border:1px solid rgba(34,211,238,.14);
+  background:rgba(34,211,238,.045);
+  border-radius:11px;color:#9ca3af;
+  font-size:11.5px;line-height:1.6;margin-bottom:16px;
+}
+.notice i{color:var(--cyan);margin-right:7px}
+
+/* ══════════ EMPTY ══════════ */
+.empty{
+  padding:34px 16px;text-align:center;
+  color:var(--muted);border:1px dashed rgba(255,255,255,.1);
+  border-radius:13px;font-size:12.5px;
+}
+.empty i{font-size:22px;color:#475569;margin-bottom:11px;display:block}
+.empty strong{display:block;color:#cbd5e1;margin-bottom:5px;font-size:13px}
+
+/* ══════════ MODAL ══════════ */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:60;
+  background:rgba(2,4,6,.8);backdrop-filter:blur(10px);
+  display:grid;place-items:center;padding:20px;
+  animation:fadeIn .2s var(--ease) both;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  width:min(580px,100%);max-height:90vh;overflow:auto;
+  background:#101820;border:1px solid var(--line-strong);
+  border-radius:20px;box-shadow:0 40px 120px rgba(0,0,0,.75);
+  animation:modalIn .25s var(--ease) both;
+}
+.modal.wide{width:min(880px,100%)}
+@keyframes modalIn{
+  from{opacity:0;transform:translateY(12px) scale(.985)}
+  to{opacity:1;transform:none}
+}
+.modal-inner{padding:24px}
+.modal-head{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin-bottom:18px;
+}
+.modal-head h2{font-size:17px;margin:0;font-weight:700}
+.close-btn{
+  width:34px;height:34px;border:1px solid var(--line);
+  border-radius:9px;background:#18222b;color:var(--muted);
+  display:grid;place-items:center;transition:all .2s;
+}
+.close-btn:hover{color:var(--green);border-color:rgba(52,211,153,.25)}
+.modal-copy{font-size:12.5px;color:var(--muted);line-height:1.65}
+.modal-actions{display:flex;gap:9px;margin-top:20px}
+.modal-actions .btn{flex:1}
+
+/* ══════════ TOAST ══════════ */
+.toast-stack{
+  position:fixed;right:20px;top:20px;z-index:100;
+  display:grid;gap:10px;width:min(360px,calc(100% - 40px));
+}
+.toast{
+  display:flex;align-items:flex-start;gap:11px;
+  padding:14px 16px;background:#141e27;
+  border:1px solid var(--line);border-radius:13px;
+  box-shadow:0 16px 50px rgba(0,0,0,.45);
+  font-size:12.5px;line-height:1.5;
+  animation:toastIn .25s var(--ease) both;
+  backdrop-filter:blur(12px);
+}
+.toast.success i{color:var(--green)}
+.toast.error i{color:var(--red)}
+.toast.info i{color:var(--cyan)}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+
+/* ══════════ SPINNER ══════════ */
+.spinner{
+  width:14px;height:14px;border:2px solid rgba(255,255,255,.2);
+  border-top-color:currentColor;border-radius:50%;
+  display:inline-block;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══════════ MOBILE ══════════ */
+.mobile-scrim{display:none}
+@media(max-width:1080px){
+  :root{--sidebar:236px}
+  .content{padding-inline:22px}
+  .grid-two{grid-template-columns:1fr}
+  .group-meta{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);width:270px}
+  .sidebar.open{transform:translateX(0)}
+  .mobile-scrim.show{
+    display:block;position:fixed;inset:0;
+    background:rgba(0,0,0,.6);z-index:25;
+    animation:fadeIn .2s ease;
+  }
+  .main{margin-left:0}
+  .menu-toggle{display:inline-grid;place-items:center}
+  .topbar{height:68px;padding:0 16px}
+  .content{padding:22px 15px 42px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .stat-card:last-child{grid-column:1/-1}
+  .page-heading{align-items:flex-start;flex-direction:column;gap:12px}
+  .endpoint-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .stat-grid{grid-template-columns:1fr}
+  .stat-card:last-child{grid-column:auto}
+  .group-meta{grid-template-columns:repeat(2,1fr)}
+  .top-right .connection span:not(.pulse){display:none}
+  .group-top{flex-direction:column;gap:10px}
+  .modal-actions{flex-direction:column}
+  .panel{padding:16px}
+  .brand-sub{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+</style>
+</head>
+<body>
+<div id="toastStack" class="toast-stack" aria-live="polite"></div>
+<div id="mobileScrim" class="mobile-scrim"></div>
+
+<!-- ═══════ SIDEBAR ═══════ -->
+<aside id="sidebar" class="sidebar">
+  <div class="brand">
+    <div class="brand-mark">B</div>
+    <div>
+      <div class="brand-title">BISHAL ENGINE</div>
+      <div class="brand-sub">Master control room</div>
+    </div>
+  </div>
+  <div class="nav-label">Workspace</div>
+  <nav class="nav" id="navigation">
+    <button class="active" data-tab="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</button>
+    <button data-tab="users"><i class="fa-solid fa-users"></i> Users &amp; Credits</button>
+    <button data-tab="coupons"><i class="fa-solid fa-ticket"></i> Coupons</button>
+    <button data-tab="groups"><i class="fa-solid fa-layer-group"></i> Running Groups</button>
+    <button data-tab="accounts"><i class="fa-solid fa-robot"></i> Manual Accounts</button>
+    <button data-tab="api"><i class="fa-solid fa-code"></i> API System</button>
+    <button data-tab="settings"><i class="fa-solid fa-sliders"></i> Settings</button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="admin-mini">
+      <div class="avatar">A</div>
+      <div>
+        <strong>Administrator</strong>
+        <small>Master privileges</small>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════ MAIN ═══════ -->
+<div class="main">
+  <header class="topbar">
+    <div class="top-left">
+      <button class="icon-button menu-toggle" id="menuToggle" aria-label="Open navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div>
+        <div class="page-kicker">BISHAL / ADMIN</div>
+        <div class="page-title" id="topTitle">Dashboard</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="connection">
+        <span class="pulse"></span>
+        <span id="connectionText">Checking system</span>
+      </div>
+      <button class="icon-button" id="globalRefresh" title="Refresh current view">
+        <i class="fa-solid fa-rotate"></i>
+      </button>
+      <button class="icon-button" id="logoutBtn" title="Logout">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- ═══════ DASHBOARD ═══════ -->
+    <section class="page-section active" id="tab-dashboard">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">System overview</div>
+          <h1>Command center</h1>
+          <p>Live visibility across your BISHAL Engine instance.</p>
+        </div>
+        <span class="muted mono" id="dashboardUpdated">SYNC —</span>
+      </div>
+      <div class="stat-grid">
+        <article class="card stat-card">
+          <div class="stat-top">
+            <span>Online Bots</span>
+            <span class="stat-icon"><i class="fa-solid fa-robot"></i></span>
+          </div>
+          <div class="stat-number" id="statBots">—</div>
+          <div class="stat-foot">Currently connected to the engine</div>
+        </article>
+        <article class="card stat-card">
+          <div class="stat-top">
+            <span>Total Glory Pushed</span>
+            <span class="stat-icon"><i class="fa-solid fa-chart-line"></i></span>
+          </div>
+          <div class="stat-number green" id="statGlory">—</div>
+          <div class="stat-foot">Cumulative glory across the system</div>
+        </article>
+        <article class="card stat-card">
+          <div class="stat-top">
+            <span>Running Groups</span>
+            <span class="stat-icon"><i class="fa-solid fa-bolt"></i></span>
+          </div>
+          <div class="stat-number" id="statGroups">—</div>
+          <div class="stat-foot">Active group processes</div>
+        </article>
+      </div>
+      <article class="card panel">
+        <div class="panel-head">
+          <div>
+            <h2><i class="fa-solid fa-signal green"></i> Live group activity</h2>
+            <p>Top running groups reported by the engine.</p>
+          </div>
+          <button class="btn btn-sm" data-goto="groups">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> All groups
+          </button>
+        </div>
+        <div id="topGroups" class="feed-list">
+          <div class="empty">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <strong>Loading activity</strong>
+            Fetching live group data…
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ═══════ USERS ═══════ -->
+    <section class="page-section" id="tab-users">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">Access management</div>
+          <h1>Users &amp; Credits</h1>
+          <p>Create accounts, review balances and manage user access.</p>
+        </div>
+        <button class="btn" id="usersRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+      </div>
+      <div class="grid-two">
+        <article class="card form-card">
+          <div class="panel-head">
+            <div>
+              <h2><i class="fa-solid fa-user-plus green"></i> Create user</h2>
+              <p>Provision a new dashboard account.</p>
+            </div>
+          </div>
+          <form id="createUserForm">
+            <div class="field">
+              <label for="newUsername">Username</label>
+              <input id="newUsername" required maxlength="64" placeholder="e.g. player_01">
+            </div>
+            <div class="field">
+              <label for="newPassword">Password</label>
+              <input id="newPassword" type="password" required minlength="6" placeholder="Set a secure password">
+            </div>
+            <div class="field">
+              <label for="newCredits">Initial credits</label>
+              <input id="newCredits" type="number" min="0" step="1" value="0" required>
+            </div>
+            <button class="btn btn-primary" id="createUserBtn" type="submit">
+              <i class="fa-solid fa-plus"></i> Create user
+            </button>
+          </form>
+        </article>
+        <article class="card table-card">
+          <div class="panel" style="padding-bottom:12px">
+            <div class="panel-head" style="margin:0">
+              <div>
+                <h2>Manage users</h2>
+                <p id="usersCount">Registered accounts</p>
+              </div>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th>Username</th><th>Credits</th><th>Role</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="usersTable">
+                <tr><td colspan="4" class="table-empty">Loading users…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ═══════ COUPONS ═══════ -->
+    <section class="page-section" id="tab-coupons">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">Promotions</div>
+          <h1>Coupon center</h1>
+          <p>Generate credit codes and track redemption status.</p>
+        </div>
+        <button class="btn" id="couponsRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+      </div>
+      <article class="card form-card" style="margin-bottom:16px">
+        <div class="panel-head">
+          <div>
+            <h2><i class="fa-solid fa-wand-magic-sparkles green"></i> Coupon generator</h2>
+            <p>Create one or more redeemable codes.</p>
+          </div>
+        </div>
+        <form id="generateCouponForm" class="grid-two" style="grid-template-columns:1fr 1fr auto;align-items:end">
+          <div class="field" style="margin:0">
+            <label for="couponCredits">Credits per coupon</label>
+            <input id="couponCredits" type="number" min="1" step="1" value="5" required>
+          </div>
+          <div class="field" style="margin:0">
+            <label for="couponQuantity">Quantity</label>
+            <input id="couponQuantity" type="number" min="1" max="500" value="1" required>
+          </div>
+          <button class="btn btn-primary" id="generateCouponBtn" type="submit">
+            <i class="fa-solid fa-sparkles"></i> Generate
+          </button>
+        </form>
+      </article>
+      <article class="card table-card">
+        <div class="panel">
+          <div class="panel-head" style="margin:0">
+            <div>
+              <h2>Generated coupons</h2>
+              <p>Copy codes to distribute them securely.</p>
+            </div>
+            <span class="pill pill-green" id="couponCount">0 CODES</span>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Coupon code</th><th>Credits</th><th>Used by</th><th>Status</th></tr>
+            </thead>
+            <tbody id="couponsTable">
+              <tr><td colspan="4" class="table-empty">Loading coupons…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- ═══════ GROUPS ═══════ -->
+    <section class="page-section" id="tab-groups">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">Global operations</div>
+          <h1>Running groups</h1>
+          <p>Inspect and control every group reported by the engine.</p>
+        </div>
+        <button class="btn" id="groupsRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+      </div>
+      <div id="allGroups" class="group-list">
+        <div class="empty">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+          <strong>Loading groups</strong>
+          Collecting global group status…
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════ ACCOUNTS ═══════ -->
+    <section class="page-section" id="tab-accounts">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">Bot inventory</div>
+          <h1>Manual accounts</h1>
+          <p>Manage region-specific account records.</p>
+        </div>
+        <button class="btn" id="accountsRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+      </div>
+      <div class="grid-two">
+        <article class="card form-card">
+          <div class="panel-head">
+            <div>
+              <h2><i class="fa-solid fa-database green"></i> Account storage</h2>
+              <p>Paste a JSON array of account objects.</p>
+            </div>
+          </div>
+          <form id="accountsForm">
+            <div class="field">
+              <label for="accountRegion">Region</label>
+              <select id="accountRegion">
+                <option value="IND">India (IND)</option>
+                <option value="BD">Bangladesh (BD)</option>
+                <option value="ME">Middle East (ME)</option>
+                <option value="BR">Brazil (BR)</option>
+                <option value="SG">Singapore (SG)</option>
+                <option value="EU">Europe (EU)</option>
+                <option value="US">North America (US)</option>
+                <option value="PK">Pakistan (PK)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="accountsJson">Accounts JSON</label>
+              <textarea id="accountsJson" spellcheck="false" placeholder='[
+  {"uid":"123","password":"abc"}
+]'></textarea>
+              <small>Validate your JSON before saving. Avoid sharing credentials in public.</small>
+            </div>
+            <button class="btn btn-primary" id="saveAccountsBtn" type="submit">
+              <i class="fa-solid fa-floppy-disk"></i> Save accounts
+            </button>
+          </form>
+        </article>
+        <article class="card panel">
+          <div class="panel-head">
+            <div>
+              <h2>Region inventory</h2>
+              <p>Saved account count by region.</p>
+            </div>
+          </div>
+          <div id="accountCounts" class="feed-list">
+            <div class="empty">Select refresh to load account inventory.</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ═══════ API ═══════ -->
+    <section class="page-section" id="tab-api">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">Developer reference</div>
+          <h1>API system</h1>
+          <p>Endpoint reference for the current BISHAL Engine integration.</p>
+        </div>
+        <span class="pill pill-green">REFERENCE</span>
+      </div>
+      <div class="notice">
+        <i class="fa-solid fa-circle-info"></i>
+        These cards are documentation only. Requests are sent to the same origin as this admin panel. Keep admin routes protected on your server.
+      </div>
+      <div class="endpoint-grid" id="endpointGrid"></div>
+    </section>
+
+    <!-- ═══════ SETTINGS ═══════ -->
+    <section class="page-section" id="tab-settings">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">Engine configuration</div>
+          <h1>System settings</h1>
+          <p>Update operational defaults used by the backend.</p>
+        </div>
+        <button class="btn" id="settingsRefresh"><i class="fa-solid fa-rotate"></i> Reload</button>
+      </div>
+      <article class="card form-card" style="max-width:720px">
+        <div class="panel-head">
+          <div>
+            <h2><i class="fa-solid fa-sliders green"></i> Runtime configuration</h2>
+            <p>Changes are saved through the settings API.</p>
+          </div>
+        </div>
+        <form id="settingsForm">
+          <div class="field">
+            <label for="goalHours">Goal hours</label>
+            <input id="goalHours" type="number" min="1" max="168" step="1" placeholder="8">
+          </div>
+          <div class="field">
+            <label for="botCount">Bot count per group</label>
+            <input id="botCount" type="number" min="1" max="100" step="1" placeholder="4">
+          </div>
+          <div class="field">
+            <label for="bioText">Bio text</label>
+            <textarea id="bioText" style="min-height:100px;font-family:var(--sans);font-size:13px" placeholder="Enter the default bio text…"></textarea>
+          </div>
+          <button class="btn btn-primary" id="saveSettingsBtn" type="submit">
+            <i class="fa-solid fa-check"></i> Save settings
+          </button>
+        </form>
+      </article>
+    </section>
+  </main>
+</div>
+
+<!-- ═══════ CONFIRM MODAL ═══════ -->
+<div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmHeading">
+  <div class="modal">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <h2 id="confirmHeading">Confirm action</h2>
+        <button class="close-btn" data-close="confirmModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p class="modal-copy" id="confirmMessage">Are you sure you want to continue?</p>
+      <div class="modal-actions">
+        <button class="btn" data-close="confirmModal">Cancel</button>
+        <button class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ LOG MODAL ═══════ -->
+<div id="logModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="logHeading">
+  <div class="modal wide">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">Execution report</div>
+          <h2 id="logHeading">Group log</h2>
+        </div>
+        <button class="close-btn" data-close="logModal" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="notice" id="logSummary">Loading group details…</div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Bot name</th><th>UID</th><th>Glory</th><th>Status</th></tr>
+          </thead>
+          <tbody id="logTable">
+            <tr><td colspan="5" class="table-empty">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════
+   BISHAL ENGINE — Admin Control Room
+   API_BASE is intentionally same-origin by default.
+   ═══════════════════════════════════════════════════════════ */
+const API_BASE = "";
+const POLL_MS = 5000;
+const state = {
+  activeTab: "dashboard",
+  pollTimer: null,
+  groups: [],
+  users: [],
+  coupons: [],
+  accounts: [],
+  pendingAction: null
+};
+const $ = (s, root=document) => root.querySelector(s);
+const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+
+const API_DOCS = [
+  ["GET","/api/stats?user=admin","System metrics including online bots, total glory and running groups.","user"],
+  ["GET","/api/admin/users","List user accounts, roles and credit balances.","—"],
+  ["POST","/api/admin/users","Create a user with username, password and initial credits.","username, password, credits"],
+  ["POST","/api/admin/add_credits","Add credits to a selected user account.","username, credits"],
+  ["GET","/api/admin/coupons","List generated coupons and redemption state.","—"],
+  ["POST","/api/admin/gen_coupon","Generate coupon codes with a credit value and quantity.","credits, quantity"],
+  ["GET","/api/admin/get_accounts","Retrieve manually stored bot accounts.","region (if supported)"],
+  ["POST","/api/admin/save_accounts","Save account records for a selected region.","region, accounts"],
+  ["GET","/api/groups?user=admin","List groups visible to the admin account.","user"],
+  ["GET","/stop?group_id={id}&user=admin","Stop a running group.","group_id, user"],
+  ["GET","/restart?group_id={id}&user=admin","Restart a stopped group.","group_id, user"],
+  ["GET","/delete?group_id={id}&user=admin","Delete a group record.","group_id, user"],
+  ["GET","/api/groups/log?group_id={id}","Fetch bot-level details and group execution logs.","group_id"],
+  ["GET","/api/settings/get","Read current engine settings.","—"],
+  ["POST","/api/settings/save","Save engine configuration values.","goal_hours, bot_count, bio_text"]
+];
+
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function num(v){const n=Number(v);return Number.isFinite(n)?n.toLocaleString("en-IN"):"0";}
+
+function toast(message,type="info",duration=3500){
+  const node=document.createElement("div");node.className=`toast ${type}`;
+  const icon=document.createElement("i");icon.className=`fa-solid ${type==="success"?"fa-circle-check":type==="error"?"fa-circle-exclamation":"fa-circle-info"}`;
+  const text=document.createElement("span");text.textContent=message;node.append(icon,text);$("#toastStack").append(node);
+  setTimeout(()=>{node.style.opacity="0";node.style.transform="translateX(10px)";setTimeout(()=>node.remove(),220);},duration);
+}
+
+async function request(path,{method="GET",body,headers={}}={}){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),16000);
+  try{
+    const response=await fetch(`${API_BASE}${path}`,{
+      method,credentials:"same-origin",headers:{"Accept":"application/json",...(body!==undefined?{"Content-Type":"application/json"}:{}),...headers},
+      body:body===undefined?undefined:JSON.stringify(body),signal:controller.signal
+    });
+    const raw=await response.text();let data={};
+    try{data=raw?JSON.parse(raw):{};}catch{data={message:raw||"Invalid server response"};}
+    if(!response.ok||data.ok===false||data.success===false)throw new Error(data.message||data.error||`HTTP ${response.status}`);
+    return data;
+  }catch(e){if(e.name==="AbortError")throw new Error("Request timed out. Please try again.");throw e;}
+  finally{clearTimeout(timer);}
+}
+
+function busy(button,on,label="Working…"){
+  if(!button)return;
+  if(on){button.dataset.html=button.innerHTML;button.disabled=true;button.innerHTML=`<span class="spinner"></span> ${esc(label)}`;}
+  else{button.disabled=false;if(button.dataset.html)button.innerHTML=button.dataset.html;delete button.dataset.html;}
+}
+
+function showEmpty(message,sub=""){return `<div class="empty"><i class="fa-solid fa-box-open"></i><strong>${esc(message)}</strong>${esc(sub)}</div>`;}
+function groupId(g){return g.group_id??g.id??g.groupId??"";}
+function groupRunning(g){const s=String(g.status||"").toUpperCase();return s==="RUNNING"||s==="ACTIVE";}
+function currentUser(){return "admin";}
+
+function setTab(tab){
+  if(!$("#tab-"+tab))return;
+  state.activeTab=tab;
+  $$(".page-section").forEach(el=>el.classList.toggle("active",el.id==="tab-"+tab));
+  $$("#navigation button").forEach(btn=>btn.classList.toggle("active",btn.dataset.tab===tab));
+  const active=$(`#navigation button[data-tab="${tab}"]`);
+  $("#topTitle").textContent=active?active.textContent.trim():"Dashboard";
+  $("#sidebar").classList.remove("open");$("#mobileScrim").classList.remove("show");
+  loadTab(tab);
+}
+
+function openConfirm(title,message,actionLabel,action){
+  $("#confirmHeading").textContent=title;$("#confirmMessage").textContent=message;
+  $("#confirmActionBtn").textContent=actionLabel;state.pendingAction=action;
+  $("#confirmModal").classList.remove("hidden");
+}
+async function runConfirm(){
+  const action=state.pendingAction;if(!action)return;
+  const btn=$("#confirmActionBtn");busy(btn,true,"Processing");
+  try{await action();$("#confirmModal").classList.add("hidden");}
+  catch(e){toast(e.message||"Action failed.","error");}
+  finally{busy(btn,false);state.pendingAction=null;}
+}
+
+async function loadStats(){
+  const data=await request("/api/stats?user=admin");
+  $("#statBots").textContent=num(data.online_bots);
+  $("#statGlory").textContent=num(data.total_glory_pushed);
+  $("#statGroups").textContent=num(data.groups_running);
+  $("#dashboardUpdated").textContent="SYNC · "+new Date().toLocaleTimeString();
+  $("#connectionText").textContent="Engine connected";
+}
+async function loadGroups(){
+  const data=await request("/api/groups?user=admin");
+  state.groups=Array.isArray(data.groups)?data.groups:[];
+  renderGroups();
+}
+function renderTopGroups(){
+  const running=state.groups.filter(groupRunning).slice(0,3);
+  $("#topGroups").innerHTML=running.length?running.map(g=>`
+    <div class="feed-item"><div><div class="feed-name">${esc(g.guild_name||g.clan_name||g.name||"Unknown guild")}</div><div class="feed-sub">OWNER ${esc(g.user||g.username||g.owner||"—")} · ${esc(g.region||"—")}</div></div><div class="feed-glory">${num(g.group_glory??g.glory??g.total_glory)}</div></div>`).join(""):showEmpty("No running groups","New activity will appear here when a group starts.");
+}
+function renderGroups(){
+  const host=$("#allGroups");
+  renderTopGroups();
+  if(!state.groups.length){host.innerHTML=showEmpty("No groups found","There are currently no groups in the system.");return;}
+  host.innerHTML=state.groups.map(g=>{
+    const id=groupId(g),running=groupRunning(g),status=String(g.status||"STOPPED").toUpperCase();
+    const progress=Math.max(0,Math.min(100,Number(g.progress??(running?100:0))||0));
+    return `<article class="group-card" data-id="${esc(id)}">
+      <div class="group-top"><div><div class="group-title">${esc(g.guild_name||g.clan_name||g.name||"Unknown guild")}</div><div class="group-sub">GUILD ${esc(g.guild_id??g.clan_id??"—")} · GROUP ${esc(id||"—")} · OWNER ${esc(g.user||g.username||g.owner||"—")}</div></div>
+      <span class="pill ${running?"pill-green":"pill-red"}">${running?"● RUNNING":"● "+esc(status)}</span></div>
+      <div class="group-glory">${num(g.group_glory??g.glory??g.total_glory)} <small style="font:500 9px Outfit;color:#64748b">GROUP GLORY</small></div>
+      <div class="group-meta">
+        <div><div class="meta-label">Region</div><div class="meta-value">${esc(g.region||"—")}</div></div>
+        <div><div class="meta-label">Members</div><div class="meta-value">${num(g.members??g.member_count)}</div></div>
+        <div><div class="meta-label">Bots</div><div class="meta-value">${num(g.bots??g.bot_count)}</div></div>
+        <div><div class="meta-label">Clan Glory</div><div class="meta-value">${num(g.clan_glory)}</div></div>
+      </div>
+      <div class="meta-label" style="display:flex;justify-content:space-between;margin-top:12px"><span>Progress</span><span class="mono">${progress}%</span></div><div class="progress-line"><span style="width:${progress}%"></span></div>
+      <div class="group-actions">
+        <button class="btn btn-sm btn-danger" data-group-action="stop" data-id="${esc(id)}" ${!running||!id?"disabled":""}><i class="fa-solid fa-stop"></i> Stop</button>
+        <button class="btn btn-sm btn-warning" data-group-action="restart" data-id="${esc(id)}" ${!id?"disabled":""}><i class="fa-solid fa-rotate-right"></i> Restart</button>
+        <button class="btn btn-sm btn-danger" data-group-action="delete" data-id="${esc(id)}" ${!id?"disabled":""}><i class="fa-solid fa-trash"></i> Delete</button>
+        <button class="btn btn-sm" data-group-action="log" data-id="${esc(id)}" ${!id?"disabled":""}><i class="fa-solid fa-file-lines"></i> View log</button>
+      </div></article>`;
+  }).join("");
+}
+
+async function loadUsers(){
+  const data=await request("/api/admin/users");
+  state.users=Array.isArray(data.users)?data.users:[];
+  $("#usersCount").textContent=`${state.users.length} registered account${state.users.length===1?"":"s"}`;
+  $("#usersTable").innerHTML=state.users.length?state.users.map(u=>{
+    const username=u.username??u.user??"—",role=String(u.role||"USER").toUpperCase();
+    return `<tr><td><strong>${esc(username)}</strong></td><td class="mono green">${num(u.credits)}</td><td><span class="pill ${role==="ADMIN"?"pill-yellow":"pill-green"}">${esc(role)}</span></td><td><div class="action-row"><button class="btn btn-sm" data-user-action="credit" data-user="${esc(username)}"><i class="fa-solid fa-plus"></i> +1</button><button class="btn btn-sm btn-danger" data-user-action="delete" data-user="${esc(username)}"><i class="fa-solid fa-trash"></i></button></div></td></tr>`;
+  }).join(""):`<tr><td colspan="4" class="table-empty">No users found.</td></tr>`;
+}
+async function createUser(e){
+  e.preventDefault();const btn=$("#createUserBtn");
+  const payload={username:$("#newUsername").value.trim(),password:$("#newPassword").value,credits:Number($("#newCredits").value)};
+  if(!payload.username||!payload.password||!Number.isInteger(payload.credits)||payload.credits<0)return toast("Please enter valid user details.","error");
+  busy(btn,true,"Creating");
+  try{const data=await request("/api/admin/users",{method:"POST",body:payload});toast(data.message||"User created successfully.","success");$("#createUserForm").reset();$("#newCredits").value="0";await loadUsers();}
+  catch(e){toast(e.message||"Could not create user.","error");}finally{busy(btn,false);}
+}
+async function addCredit(username){
+  const data=await request("/api/admin/add_credits",{method:"POST",body:{username,credits:1}});
+  toast(data.message||`Added 1 credit to ${username}.`,"success");await loadUsers();
+}
+async function deleteUser(username){
+  toast("Delete-user API is not configured. Add a documented backend endpoint before enabling this action.","info");
+}
+
+async function loadCoupons(){
+  const data=await request("/api/admin/coupons");
+  state.coupons=Array.isArray(data.coupons)?data.coupons:[];
+  $("#couponCount").textContent=`${state.coupons.length} CODES`;
+  $("#couponsTable").innerHTML=state.coupons.length?state.coupons.map(c=>{
+    const code=c.code??c.coupon_code??"",used=Boolean(c.used??c.is_used??c.used_by);
+    return `<tr><td><span class="coupon-code">${esc(code)}</span> <button class="code-copy" title="Copy coupon" data-copy="${esc(code)}"><i class="fa-regular fa-copy"></i></button></td><td class="mono">${num(c.credits??c.amount)}</td><td>${esc(c.used_by||"—")}</td><td><span class="pill ${used?"pill-red":"pill-green"}">${used?"USED":"UNUSED"}</span></td></tr>`;
+  }).join(""):`<tr><td colspan="4" class="table-empty">No coupons generated yet.</td></tr>`;
+}
+async function generateCoupons(e){
+  e.preventDefault();const btn=$("#generateCouponBtn"),credits=Number($("#couponCredits").value),quantity=Number($("#couponQuantity").value);
+  if(!Number.isInteger(credits)||credits<1||!Number.isInteger(quantity)||quantity<1||quantity>500)return toast("Enter valid credits and quantity (1–500).","error");
+  busy(btn,true,"Generating");
+  try{const data=await request("/api/admin/gen_coupon",{method:"POST",body:{credits,quantity}});toast(data.message||"Coupons generated.","success");if(Array.isArray(data.coupons)&&data.coupons.length){await copyText(data.coupons.map(c=>typeof c==="string"?c:c.code).filter(Boolean).join("\n"));toast("Generated coupon codes copied to clipboard.","success");}await loadCoupons();}
+  catch(e){toast(e.message||"Coupon generation failed.","error");}finally{busy(btn,false);}
+}
+
+async function loadAccounts(){
+  const data=await request("/api/admin/get_accounts");
+  state.accounts=Array.isArray(data.accounts)?data.accounts:(data.accounts&&typeof data.accounts==="object"?Object.entries(data.accounts).map(([region,accounts])=>({region,accounts})):[]);
+  const counts=state.accounts.map(item=>{
+    const region=item.region||item.name||"Unknown",list=Array.isArray(item.accounts)?item.accounts:(Array.isArray(item.data)?item.data:[]);
+    return {region,count:item.count??list.length,accounts:list};
+  });
+  $("#accountCounts").innerHTML=counts.length?counts.map(x=>`<div class="feed-item"><div><div class="feed-name">${esc(x.region)}</div><div class="feed-sub">REGION INVENTORY</div></div><strong class="feed-glory">${num(x.count)} <small style="font:10px var(--sans);color:#64748b">ACCOUNTS</small></strong></div>`).join(""):showEmpty("No inventory data","No saved account regions were returned.");
+  const selected=$("#accountRegion").value,match=counts.find(x=>x.region===selected);
+  if(match&&match.accounts.length)$("#accountsJson").value=JSON.stringify(match.accounts,null,2);
+}
+async function saveAccounts(e){
+  e.preventDefault();const btn=$("#saveAccountsBtn"),region=$("#accountRegion").value;let accounts;
+  try{accounts=JSON.parse($("#accountsJson").value);}catch{return toast("Invalid JSON. Check commas, quotes and brackets.","error");}
+  if(!Array.isArray(accounts))return toast("Accounts must be a JSON array.","error");
+  if(accounts.some(a=>!a||typeof a!=="object"||Array.isArray(a)||!a.uid||!a.password))return toast("Every account must include uid and password fields.","error");
+  busy(btn,true,"Saving");
+  try{const data=await request("/api/admin/save_accounts",{method:"POST",body:{region,accounts}});toast(data.message||`${accounts.length} accounts saved for ${region}.`,"success");await loadAccounts();}
+  catch(e){toast(e.message||"Could not save accounts.","error");}finally{busy(btn,false);}
+}
+
+async function loadSettings(){
+  const data=await request("/api/settings/get"),settings=data.settings||data;
+  $("#goalHours").value=settings.goal_hours??settings.goalHours??8;
+  $("#botCount").value=settings.bot_count??settings.botCount??4;
+  $("#bioText").value=settings.bio_text??settings.bioText??"";
+}
+async function saveSettings(e){
+  e.preventDefault();const btn=$("#saveSettingsBtn");
+  const payload={goal_hours:Number($("#goalHours").value),bot_count:Number($("#botCount").value),bio_text:$("#bioText").value};
+  if(!Number.isInteger(payload.goal_hours)||payload.goal_hours<1||payload.goal_hours>168||!Number.isInteger(payload.bot_count)||payload.bot_count<1||payload.bot_count>100)return toast("Check goal hours and bot count values.","error");
+  busy(btn,true,"Saving");
+  try{const data=await request("/api/settings/save",{method:"POST",body:payload});toast(data.message||"Settings saved successfully.","success");}
+  catch(e){toast(e.message||"Settings could not be saved.","error");}finally{busy(btn,false);}
+}
+
+async function groupAction(action,id){
+  const paths={stop:"/stop",restart:"/restart",delete:"/delete"};
+  if(!paths[action])throw new Error("Unknown group action.");
+  const params=new URLSearchParams({group_id:id,user:currentUser()});
+  const data=await request(`${paths[action]}?${params.toString()}`);
+  toast(data.message||`Group ${action} request completed.`,"success");await loadGroups();
+}
+async function viewLog(id){
+  $("#logHeading").textContent=`Group log · ${id}`;$("#logSummary").textContent="Fetching group details…";
+  $("#logTable").innerHTML='<tr><td colspan="5" class="table-empty">Loading bot records…</td></tr>';$("#logModal").classList.remove("hidden");
+  try{
+    const data=await request(`/api/groups/log?group_id=${encodeURIComponent(id)}`);
+    const bots=data.bots||data.details?.bots||[];
+    const total=data.total_bot_glory??data.total_glory??bots.reduce((s,b)=>s+(Number(b.glory)||0),0);
+    $("#logSummary").textContent=`Total bot glory combined: ${num(total)} · ${bots.length} bot record(s)`;
+    $("#logTable").innerHTML=bots.length?bots.map((b,i)=>`<tr><td class="mono">${i+1}</td><td>${esc(b.bot_name||b.name||b.nickname||"Unknown")}</td><td class="mono">${esc(b.uid||b.account_id||"—")}</td><td class="mono green">${num(b.glory??b.total_glory)}</td><td>${esc(b.status||"—")}</td></tr>`).join(""):'<tr><td colspan="5" class="table-empty">No bot records available.</td></tr>';
+  }catch(e){$("#logSummary").textContent=e.message||"Unable to load group log.";$("#logTable").innerHTML='<tr><td colspan="5" class="table-empty">Could not load records.</td></tr>';toast(e.message||"Could not load group log.","error");}
+}
+
+function renderApiDocs(){
+  $("#endpointGrid").innerHTML=API_DOCS.map(([method,url,desc,params])=>`
+    <article class="endpoint"><div class="endpoint-top"><span class="method ${method==="GET"?"method-get":"method-post"}">${method}</span><button class="code-copy" title="Copy endpoint" data-copy="${esc(url)}"><i class="fa-regular fa-copy"></i></button></div>
+    <div class="endpoint-url">${esc(url)}</div><div class="endpoint-desc">${esc(desc)}</div><div class="endpoint-params">PARAMS · ${esc(params)}</div></article>`).join("");
+}
+async function copyText(value){
+  try{await navigator.clipboard.writeText(value);toast("Copied to clipboard.","success");}
+  catch{const el=document.createElement("textarea");el.value=value;document.body.append(el);el.select();const ok=document.execCommand("copy");el.remove();toast(ok?"Copied to clipboard.":"Clipboard permission unavailable.","info");}
+}
+
+async function loadTab(tab){
+  const loaders={dashboard:refreshDashboard,users:loadUsers,coupons:loadCoupons,groups:loadGroups,accounts:loadAccounts,api:async()=>renderApiDocs(),settings:loadSettings};
+  try{await loaders[tab]?.();}
+  catch(e){toast(`${tab[0].toUpperCase()+tab.slice(1)}: ${e.message||"Unable to load data."}`,"error");}
+}
+async function refreshDashboard(){
+  if(state.activeTab!=="dashboard")return;
+  const results=await Promise.allSettled([loadStats(),loadGroups()]);
+  const failed=results.filter(r=>r.status==="rejected");
+  if(failed.length){$("#connectionText").textContent="Partial connection";console.warn("Dashboard refresh error",failed.map(x=>x.reason));}
+}
+async function refreshCurrent(){
+  const btn=$("#globalRefresh");busy(btn,true,"");
+  try{await loadTab(state.activeTab);toast("View refreshed.","success",1600);}
+  catch(e){toast(e.message||"Refresh failed.","error");}
+  finally{busy(btn,false);}
+}
+
+$("#navigation").addEventListener("click",e=>{const btn=e.target.closest("button[data-tab]");if(btn)setTab(btn.dataset.tab);});
+$$("[data-goto]").forEach(btn=>btn.addEventListener("click",()=>setTab(btn.dataset.goto)));
+$("#menuToggle").addEventListener("click",()=>{$("#sidebar").classList.toggle("open");$("#mobileScrim").classList.toggle("show");});
+$("#mobileScrim").addEventListener("click",()=>{$("#sidebar").classList.remove("open");$("#mobileScrim").classList.remove("show");});
+$("#globalRefresh").addEventListener("click",refreshCurrent);
+$("#logoutBtn").addEventListener("click",()=>openConfirm("Log out of admin panel?","You will leave the current admin control room. Your backend session handling is managed by the server.","Log out",async()=>{clearInterval(state.pollTimer);toast("Admin panel session ended.","success");setTimeout(()=>location.reload(),450);}));
+$("#confirmActionBtn").addEventListener("click",runConfirm);
+$$("[data-close]").forEach(btn=>btn.addEventListener("click",()=>$("#"+btn.dataset.close).classList.add("hidden")));
+$$(".modal-backdrop").forEach(el=>el.addEventListener("click",e=>{if(e.target===el)el.classList.add("hidden");}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$$(".modal-backdrop").forEach(el=>el.classList.add("hidden"));});
+$("#createUserForm").addEventListener("submit",createUser);
+$("#generateCouponForm").addEventListener("submit",generateCoupons);
+$("#accountsForm").addEventListener("submit",saveAccounts);
+$("#settingsForm").addEventListener("submit",saveSettings);
+$("#usersRefresh").addEventListener("click",()=>loadTab("users"));
+$("#couponsRefresh").addEventListener("click",()=>loadTab("coupons"));
+$("#groupsRefresh").addEventListener("click",()=>loadTab("groups"));
+$("#accountsRefresh").addEventListener("click",()=>loadTab("accounts"));
+$("#settingsRefresh").addEventListener("click",()=>loadTab("settings"));
+$("#usersTable").addEventListener("click",e=>{
+  const btn=e.target.closest("[data-user-action]");if(!btn)return;
+  const username=btn.dataset.user;
+  if(btn.dataset.userAction==="credit")openConfirm("Add one credit?",`Add +1 credit to ${username}?`,"Add credit",()=>addCredit(username));
+  if(btn.dataset.userAction==="delete")openConfirm("Delete user?",`This UI does not have a configured delete-user endpoint for ${username}.`,"Understood",async()=>{toast("No delete-user API was specified. No changes made.","info");});
+});
+$("#allGroups").addEventListener("click",e=>{
+  const btn=e.target.closest("[data-group-action]");if(!btn)return;
+  const action=btn.dataset.groupAction,id=btn.dataset.id;
+  if(action==="log")return viewLog(id);
+  const messages={stop:"Stop this group now?",restart:"Restart this group now?",delete:"Permanently delete this group? This may not be reversible."};
+  openConfirm(`${action[0].toUpperCase()+action.slice(1)} group`,messages[action],"Confirm",()=>groupAction(action,id));
+});
+document.body.addEventListener("click",e=>{const btn=e.target.closest("[data-copy]");if(btn)copyText(btn.dataset.copy);});
+$("#accountRegion").addEventListener("change",()=>{
+  const region=$("#accountRegion").value;
+  const item=state.accounts.find(x=>(x.region||x.name)===region);
+  const accounts=item?(item.accounts||item.data||[]):[];
+  $("#accountsJson").value=Array.isArray(accounts)?JSON.stringify(accounts,null,2):"";
+});
+
+renderApiDocs();
+refreshDashboard().catch(e=>toast(e.message||"Could not connect to engine.","error"));
+state.pollTimer=setInterval(()=>{if(state.activeTab==="dashboard"&&!document.hidden)refreshDashboard().catch(e=>console.warn(e));},POLL_MS);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&state.activeTab==="dashboard")refreshDashboard().catch(console.warn);});
+</script>
+</body>
+</html>
